@@ -7,13 +7,13 @@ import { AsyncRouteProps } from './types';
 export interface AfterpartyProps extends RouteComponentProps<any> {
   history: History;
   location: Location;
-  data?: Promise<any>[];
+  data?: object;
   routes: AsyncRouteProps[];
   match: Match<any>;
 }
 
 export interface AfterpartyState {
-  data?: Promise<any>[];
+  data?: object | undefined;
   previousLocation: Location | null;
 }
 
@@ -72,10 +72,9 @@ class Afterparty extends React.Component<AfterpartyProps, AfterpartyState> {
       .catch((e) => console.log(e));
   };
 
-  render() {
+  render(): any {
     const { previousLocation, data } = this.state;
     const { location } = this.props;
-    const initialData = this.prefetcherCache[location.pathname] || data;
 
     return (
       <Switch>
@@ -85,15 +84,21 @@ class Afterparty extends React.Component<AfterpartyProps, AfterpartyState> {
             path={r.path}
             exact={r.exact}
             location={previousLocation || location}
-            render={(props) =>
-              React.createElement(r.component, {
-                ...initialData,
-                history: props.history,
-                location: previousLocation || location,
-                match: props.match,
-                prefetch: this.prefetch
-              })
-            }
+            render={(props) => {
+              const After = withRouter(Afterparty);
+              const initialData = this.prefetcherCache[location.pathname] || (data ? data[r.id] : data);
+              return (
+                <r.component 
+                  {...initialData} 
+                  history={props.history} 
+                  location={previousLocation || location}
+                  match={props.match}
+                  prefetch={this.prefetch}
+                >
+                  {r.routes ? <After routes={r.routes} data={data} /> : null}
+                </r.component>
+              );
+            }}
           />
         ))}
       </Switch>

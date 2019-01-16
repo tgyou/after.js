@@ -9,7 +9,7 @@ export interface DocumentProps {
   res: Response;
   helmet: HelmetData;
   assets: Assets;
-  data: Promise<any>[];
+  data: object;
   renderPage: () => Promise<any>;
   match: Match<any> | null;
 }
@@ -47,13 +47,15 @@ export type AsyncRouteableComponent<Props = any> =
   | React.ComponentType<Props>;
 
 export interface AsyncRouteProps<Props = any> extends RouteProps {
+  id: string;
   component: AsyncRouteableComponent<Props>;
   redirectTo?: string;
+  routes?: AsyncRouteProps|any;
 }
 
 export interface InitialProps {
   match?: AsyncRouteProps;
-  data: Promise<any>[];
+  data: object;
 }
 
 export type Module<P> =
