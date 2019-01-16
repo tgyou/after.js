@@ -65,7 +65,7 @@ export async function render<T>(options: AfterRenderOptions<T>) {
   if (match.path === '**') {
     res.status(404);
   } else if (match && match.redirectTo && match.path) {
-    res.redirect(301, req.originalUrl.replace(match.path, match.redirectTo));
+    res.redirect(301, req.originalUrl.replace(String(match.path), match.redirectTo));
     return;
   }
 
