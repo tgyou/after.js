@@ -3,6 +3,7 @@ import { Switch, Route, withRouter, match as Match, RouteComponentProps } from '
 import { loadInitialProps } from './loadInitialProps';
 import { History, Location } from 'history';
 import { AsyncRouteProps } from './types';
+import makeRoutes from'./makeRoutes';
 
 export interface AfterpartyProps extends RouteComponentProps<any> {
   history: History;
@@ -75,10 +76,11 @@ class Afterparty extends React.Component<AfterpartyProps, AfterpartyState> {
   render(): any {
     const { previousLocation, data } = this.state;
     const { location } = this.props;
+    const routes = makeRoutes(this.props.routes);
 
     return (
       <Switch>
-        {this.props.routes.map((r, i) => (
+        {routes.map((r, i) => (
           <Route
             key={`route--${i}`}
             path={r.path}

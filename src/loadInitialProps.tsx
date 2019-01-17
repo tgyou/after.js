@@ -1,4 +1,5 @@
 import matchRoutes from './matchRoutes';
+import makeRoutes from './makeRoutes';
 import { AsyncRouteProps, InitialProps, CtxBase } from './types';
 import { isAsyncComponent } from './utils';
 
@@ -6,7 +7,7 @@ export async function loadInitialProps(routes: AsyncRouteProps[], pathname: stri
   const ids: Array<String> = [];
   const promises: Promise<any>[] = [];
 
-  const matches = matchRoutes(routes, pathname);
+  const matches = matchRoutes(makeRoutes(routes), pathname);
   const matchedComponent = matches[matches.length - 1].route || null;
 
   matches.map(match => {
