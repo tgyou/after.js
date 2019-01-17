@@ -62,7 +62,6 @@ class Afterparty extends React.Component<AfterpartyProps> {
             exact={r.exact}
             location={location}
             render={(props) => {
-              const After = withRouter(Afterparty);
               const initialData = data[r.id] || null;
               if (initialData) delete data[r.id];
 
@@ -86,7 +85,9 @@ class Afterparty extends React.Component<AfterpartyProps> {
                   location={location}
                   match={props.match}
                   prefetch={this.prefetch}>
-                  {r.routes ? <After routes={r.routes} data={data} /> : null}
+                  {r.routes ? <Afterparty history={props.history} 
+                  location={location}
+                  match={props.match} routes={r.routes} data={data} /> : null}
                 </AfterComponent>
               );
             }}
