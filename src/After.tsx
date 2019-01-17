@@ -66,6 +66,17 @@ class Afterparty extends React.Component<AfterpartyProps> {
               const initialData = data[r.id] || null;
               if (initialData) delete data[r.id];
 
+              // return (
+              //   <r.component 
+              //     {...initialData}
+              //     history={props.history} 
+              //     location={location}
+              //     match={props.match}
+              //     prefetch={this.prefetch}>
+              //     {r.routes ? <After routes={r.routes} data={data} /> : null}
+              //   </r.component>
+              // );
+
               return (
                 <AfterComponent
                   route={r}
@@ -93,15 +104,17 @@ export interface AfterComponentProps extends RouteComponentProps<any> {
   initialData?: object;
   routes: AsyncRouteProps[];
   match: Match<any>;
-  route: object;
+  route: AsyncRouteProps;
   component?: any;
+  children?: Element | null;
+
 }
 
 export interface AfterComponentState {
   data?: object | undefined;
 }
 
-class AfterComponent extends React.Component<AfterComponentProps, AfterComponentState> {
+class AfterComponent extends React.Component<any, any> {
   
   constructor(props: AfterComponentProps) {
     super(props);
@@ -130,7 +143,7 @@ class AfterComponent extends React.Component<AfterComponentProps, AfterComponent
   }
   
   
-  render() {
+  render(): any {
     const { initialData, component, children, ...props } = this.props;
     const { data } = this.state;
 
