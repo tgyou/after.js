@@ -3,6 +3,7 @@ import { Switch, Route, withRouter, match as Match, RouteComponentProps } from '
 import { loadInitialProps } from './loadInitialProps';
 import { History, Location } from 'history';
 import { AsyncRouteProps } from './types';
+import { isAsyncComponent } from './utils';
 import makeRoutes from'./makeRoutes';
 
 export interface AfterpartyProps extends RouteComponentProps<any> {
@@ -14,21 +15,15 @@ export interface AfterpartyProps extends RouteComponentProps<any> {
 }
 
 export interface AfterpartyState {
-  data?: object | undefined;
+  data: object;
   previousLocation: Location | null;
 }
 
-class Afterparty extends React.Component<AfterpartyProps, AfterpartyState> {
+class Afterparty extends React.Component<AfterpartyProps> {
   prefetcherCache: any;
 
   constructor(props: AfterpartyProps) {
     super(props);
-
-    this.state = {
-      data: props.data,
-      previousLocation: null
-    };
-
     this.prefetcherCache = {};
   }
 
@@ -37,26 +32,6 @@ class Afterparty extends React.Component<AfterpartyProps, AfterpartyState> {
     const navigated = nextProps.location !== this.props.location;
     if (navigated) {
       window.scrollTo(0, 0);
-      // save the location so we can render the old screen
-      this.setState({
-        previousLocation: this.props.location,
-        data: undefined // unless you want to keep it
-      });
-
-      const { data, match, routes, history, location, staticContext, ...rest } = nextProps;
-
-      loadInitialProps(this.props.routes, nextProps.location.pathname, {
-        location: nextProps.location,
-        history: nextProps.history,
-        ...rest
-      })
-        .then(({ data }) => {
-          this.setState({ previousLocation: null, data });
-        })
-        .catch((e) => {
-          // @todo we should more cleverly handle errors???
-          console.log(e);
-        });
     }
   }
 
@@ -74,9 +49,9 @@ class Afterparty extends React.Component<AfterpartyProps, AfterpartyState> {
   };
 
   render(): any {
-    const { previousLocation, data } = this.state;
     const { location } = this.props;
     const routes = makeRoutes(this.props.routes);
+    const data = { ...(this.props.data || {}) };
 
     return (
       <Switch>
@@ -85,20 +60,23 @@ class Afterparty extends React.Component<AfterpartyProps, AfterpartyState> {
             key={`route--${i}`}
             path={r.path}
             exact={r.exact}
-            location={previousLocation || location}
+            location={location}
             render={(props) => {
               const After = withRouter(Afterparty);
-              const initialData = this.prefetcherCache[location.pathname] || (data ? data[r.id] : data);
+              const initialData = data[r.id] || null;
+              if (initialData) delete data[r.id];
+
               return (
-                <r.component 
-                  {...initialData} 
+                <AfterComponent
+                  route={r}
+                  initialData={...initialData}
+                  component={r.component}
                   history={props.history} 
-                  location={previousLocation || location}
+                  location={location}
                   match={props.match}
-                  prefetch={this.prefetch}
-                >
+                  prefetch={this.prefetch}>
                   {r.routes ? <After routes={r.routes} data={data} /> : null}
-                </r.component>
+                </AfterComponent>
               );
             }}
           />
@@ -107,4 +85,58 @@ class Afterparty extends React.Component<AfterpartyProps, AfterpartyState> {
     );
   }
 }
+
+
+export interface AfterComponentProps extends RouteComponentProps<any> {
+  history: History;
+  location: Location;
+  initialData?: object;
+  routes: AsyncRouteProps[];
+  match: Match<any>;
+  route: object;
+  component?: any;
+}
+
+export interface AfterComponentState {
+  data?: object | undefined;
+}
+
+class AfterComponent extends React.Component<AfterComponentProps, AfterComponentState> {
+  
+  constructor(props: AfterComponentProps) {
+    super(props);
+
+    this.state = {
+      data: props.initialData
+    }
+  }
+  
+  
+  componentWillMount() {
+    const { component, initialData } = this.props;
+
+    if (typeof window !== 'undefined' && component && isAsyncComponent(component) && !initialData) {
+      this.fetch();
+    }
+  }
+
+  fetch() {
+    const { component, match, location, history } = this.props;
+    const promise = component.load
+          ? component.load().then(() => component.getInitialProps && component.getInitialProps({ match, location, history }))
+          : component.getInitialProps({ match, location, history })
+
+    promise.then((data: any) => this.setState({ data }));
+  }
+  
+  
+  render() {
+    const { initialData, component, children, ...props } = this.props;
+    const { data } = this.state;
+
+    const Component: any = component;
+    return <Component {...data} {...props}>{children}</Component>;
+  }
+}
+
 export const After = withRouter(Afterparty);
