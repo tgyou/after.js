@@ -10,6 +10,7 @@ export interface AfterpartyProps extends RouteComponentProps<any> {
   history: History;
   location: Location;
   data?: object;
+  restData?: object;
   routes: AsyncRouteProps[];
   match: Match<any>;
 }
@@ -49,7 +50,7 @@ class Afterparty extends React.Component<AfterpartyProps> {
   };
 
   render(): any {
-    const { location } = this.props;
+    const { location, restData } = this.props;
     const routes = makeRoutes(this.props.routes);
     const data = { ...(this.props.data || {}) };
 
@@ -79,6 +80,7 @@ class Afterparty extends React.Component<AfterpartyProps> {
               return (
                 <AfterComponent
                   route={r}
+                  {...restData}
                   initialData={...initialData}
                   component={r.component}
                   history={props.history} 
@@ -103,6 +105,7 @@ export interface AfterComponentProps extends RouteComponentProps<any> {
   history: History;
   location: Location;
   initialData?: object;
+  restData?: object | undefined;
   routes: AsyncRouteProps[];
   match: Match<any>;
   route: AsyncRouteProps;
@@ -119,7 +122,6 @@ class AfterComponent extends React.Component<any, any> {
   
   constructor(props: AfterComponentProps) {
     super(props);
-
     this.state = {
       data: props.initialData
     }
@@ -135,10 +137,10 @@ class AfterComponent extends React.Component<any, any> {
   }
 
   fetch() {
-    const { component, match, location, history } = this.props;
+    const { component, initialData, children, match, ...ctx } = this.props;
     const promise = component.load
-          ? component.load().then(() => component.getInitialProps && component.getInitialProps({ match, location, history }))
-          : component.getInitialProps({ match, location, history })
+          ? component.load().then(() => component.getInitialProps && component.getInitialProps({ match, ...ctx }))
+          : component.getInitialProps({ match, ...ctx })
 
     promise.then((data: any) => this.setState({ data }));
   }
