@@ -6,6 +6,8 @@ import { AsyncRouteProps } from './types';
 import { isAsyncComponent } from './utils';
 import makeRoutes from'./makeRoutes';
 
+const savedData = {};
+
 export interface AfterpartyProps extends RouteComponentProps<any> {
   history: History;
   location: Location;
@@ -52,36 +54,34 @@ class Afterparty extends React.Component<AfterpartyProps> {
   render(): any {
     const { location, restData } = this.props;
     const routes = makeRoutes(this.props.routes);
-    const data = { ...(this.props.data || {}) };
+    const data = this.props.data || {};
 
     return (
       <Switch>
         {routes.map((r, i) => (
           <Route
-            key={`route--${i}`}
+            key={r.id || `route--${i}`}
             path={r.path}
             exact={r.exact}
             location={location}
             render={(props) => {
-              const initialData = data[r.id] || null;
-              if (initialData) delete data[r.id];
+              let initialData = null;
+              if (data[r.id]) {
+                initialData = { initialData: { ...data[r.id] }};
+              } else if (savedData[r.id]) {
+                initialData = { initialData: { ...savedData[r.id] }};
+              }
 
-              // return (
-              //   <r.component 
-              //     {...initialData}
-              //     history={props.history} 
-              //     location={location}
-              //     match={props.match}
-              //     prefetch={this.prefetch}>
-              //     {r.routes ? <After routes={r.routes} data={data} /> : null}
-              //   </r.component>
-              // );
+              if (typeof window !== 'undefined' && !r.component['saveInitialProps']) {
+                data[r.id] && delete data[r.id];
+                savedData[r.id] && delete savedData[r.id];
+              }
 
               return (
                 <AfterComponent
                   route={r}
                   {...restData}
-                  initialData={...initialData}
+                  {...initialData}
                   component={r.component}
                   history={props.history} 
                   location={location}
@@ -92,6 +92,17 @@ class Afterparty extends React.Component<AfterpartyProps> {
                   match={props.match} routes={r.routes} data={data} /> : null}
                 </AfterComponent>
               );
+              
+              // return (
+              //   <r.component 
+              //     {...initialData}
+              //     history={props.history} 
+              //     location={location}
+              //     match={props.match}
+              //     prefetch={this.prefetch}>
+              //     {r.routes ? <After routes={r.routes} data={data} /> : null}
+              //   </r.component>
+              // );
             }}
           />
         ))}
@@ -142,7 +153,11 @@ class AfterComponent extends React.Component<any, any> {
           ? component.load().then(() => component.getInitialProps && component.getInitialProps({ match, ...ctx }))
           : component.getInitialProps({ match, ...ctx })
 
-    promise.then((data: any) => this.setState({ data }));
+    this.setState({ loading: promise });
+    promise.then((data: any) => {
+      if (component.saveInitialProps) savedData[this.props.route.id] = data;
+      this.setState({ data, loading: false });
+    });
   }
   
   
@@ -151,7 +166,15 @@ class AfterComponent extends React.Component<any, any> {
     const { data } = this.state;
 
     const Component: any = component;
-    return <Component {...data} {...props}>{children}</Component>;
+    if (this.state.loading && component.loadingInitialProps === null) {
+      return null;
+    } else if (this.state.loading && typeof component.loadingInitialProps === 'function') {
+      return <component.loadingInitialProps __loading={this.state.loading} />;
+    } else if (this.state.loading) {
+      return <Component __loading={this.state.loading} {...data} {...props}>{children}</Component>;
+    } else {
+      return <Component {...data} {...props}>{children}</Component>;
+    }
   }
 }
 
