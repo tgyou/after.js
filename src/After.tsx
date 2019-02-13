@@ -15,6 +15,7 @@ export interface AfterpartyProps extends RouteComponentProps<any> {
   restData?: object;
   routes: AsyncRouteProps[];
   match: Match<any>;
+  render?: Function;
 }
 
 export interface AfterpartyState {
@@ -56,8 +57,8 @@ class Afterparty extends React.Component<AfterpartyProps> {
     const routes = makeRoutes(this.props.routes);
     const data = this.props.data || {};
 
-    return (
-      <Switch>
+    const children = (
+      <Switch location={location}>
         {routes.map((r, i) => (
           <Route
             key={r.id || `route--${i}`}
@@ -108,6 +109,13 @@ class Afterparty extends React.Component<AfterpartyProps> {
         ))}
       </Switch>
     );
+
+    if (this.props.render) {
+      const { render, ...props } = this.props;
+      return render({ ...props, children });
+    } else {
+      return children;
+    }
   }
 }
 
