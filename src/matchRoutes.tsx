@@ -1,4 +1,5 @@
-import { matchPath, Router } from 'react-router-dom';
+import { Router } from 'react-router';
+import { matchPath } from 'react-router-dom';
 import { AsyncRouteProps } from './types';
 
 function matchRoutes(routes: AsyncRouteProps[], pathname: string, /*not public API*/ branch: Array<any> = []) {

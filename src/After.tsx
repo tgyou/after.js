@@ -23,7 +23,7 @@ export interface AfterpartyState {
   previousLocation: Location | null;
 }
 
-class Afterparty extends React.Component<AfterpartyProps> {
+export class Afterparty extends React.Component<AfterpartyProps> {
   prefetcherCache: any;
 
   constructor(props: AfterpartyProps) {
