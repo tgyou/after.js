@@ -88,9 +88,13 @@ export class Afterparty extends React.Component<AfterpartyProps> {
                   location={location}
                   match={props.match}
                   prefetch={this.prefetch}>
-                  {r.routes ? <Afterparty history={props.history} 
-                  location={location}
-                  match={props.match} routes={r.routes} data={data} /> : null}
+                  {r.routes ? <Afterparty 
+                    {...restData}
+                    history={props.history} 
+                    location={location}
+                    match={props.match} 
+                    routes={r.routes} 
+                    data={data} /> : null}
                 </AfterComponent>
               );
               
