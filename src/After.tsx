@@ -53,7 +53,7 @@ export class Afterparty extends React.Component<AfterpartyProps> {
   };
 
   render(): any {
-    const { location, restData } = this.props;
+    const { location, ...restData } = this.props;
     const routes = makeRoutes(this.props.routes);
     const data = this.props.data || {};
 
@@ -161,11 +161,16 @@ class AfterComponent extends React.Component<any, any> {
           ? component.load().then(() => component.getInitialProps && component.getInitialProps({ match, ...ctx }))
           : component.getInitialProps({ match, ...ctx })
 
-    this.setState({ loading: promise });
-    promise.then((data: any) => {
-      if (component.saveInitialProps) savedData[this.props.route.id] = data;
-      this.setState({ data, loading: false });
-    });
+    if (promise instanceof Promise === true) {
+      this.setState({ loading: promise });
+      promise.then((data: any) => {
+        if (component.saveInitialProps) savedData[this.props.route.id] = data;
+        this.setState({ data, loading: false });
+      });
+    } else {
+      if (component.saveInitialProps) savedData[this.props.route.id] = promise;
+      this.setState({ promise, loading: false });
+    }
   }
   
   
