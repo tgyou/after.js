@@ -165,22 +165,25 @@ class AfterComponent extends React.Component<any, any> {
           ? component.load().then(() => component.getInitialProps && component.getInitialProps({ match, ...ctx }))
           : component.getInitialProps({ match, ...ctx })
 
-    if (promise instanceof Promise === true) {
-      this.setState({ loading: promise });
-      promise.then((data: any) => {
+    return Promise
+      .resolve(promise instanceof Promise === true)
+      .then(isPromise => {
+        if (isPromise) {
+          this.setState({ loading: promise });
+        }
+        return promise;
+      }).then((data: any) => {
         if (component.saveInitialProps) savedData[this.props.route.id] = data;
         this.setState({ data, loading: false });
       });
-    } else {
-      if (component.saveInitialProps) savedData[this.props.route.id] = promise;
-      this.setState({ promise, loading: false });
-    }
   }
   
   
   render(): any {
-    const { initialData, component, children, ...props } = this.props;
+    const { initialData, component, children, data:propsData, ...props } = this.props;
     const { data } = this.state;
+
+    console.log(data, propsData);
 
     const Component: any = component;
     if (this.state.loading && component.loadingInitialProps === null) {
