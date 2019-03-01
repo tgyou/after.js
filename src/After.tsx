@@ -183,8 +183,6 @@ class AfterComponent extends React.Component<any, any> {
     const { initialData, component, children, data:propsData, ...props } = this.props;
     const { data } = this.state;
 
-    console.log(data, propsData);
-
     const Component: any = component;
     if (this.state.loading && component.loadingInitialProps === null) {
       return null;
