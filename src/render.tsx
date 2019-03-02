@@ -51,9 +51,12 @@ export async function render<T>(options: AfterRenderOptions<T>) {
     return { helmet, ...renderedContent };
   };
 
+  const location = req['_parsedUrl'];
+
   const { match, data } = await loadInitialProps(routes, url.parse(req.url).pathname as string, {
     req,
     res,
+    location,
     ...rest
   });
 
