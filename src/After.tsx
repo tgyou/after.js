@@ -12,6 +12,7 @@ export interface AfterpartyProps extends RouteComponentProps<any> {
   history: History;
   location: Location;
   data?: object;
+  id?: string;
   restData?: object;
   routes: AsyncRouteProps[];
   match: Match<any>;
@@ -54,7 +55,7 @@ export class Afterparty extends React.Component<AfterpartyProps> {
 
   render(): any {
     const { location, ...restData } = this.props;
-    const routes = makeRoutes(this.props.routes);
+    const routes = makeRoutes(this.props.routes, this.props.id);
     const data = this.props.data || {};
 
     const children = (
