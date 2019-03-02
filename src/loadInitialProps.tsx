@@ -18,8 +18,8 @@ export async function loadInitialProps(routes: AsyncRouteProps[], pathname: stri
       ids.push(route['id']);
       promises.push(
         component.load
-          ? component.load().then(() => component.getInitialProps({ match, ...ctx }))
-          : component.getInitialProps({ match, ...ctx })
+          ? component.load().then(() => component.getInitialProps({ match: match.match, ...ctx }))
+          : component.getInitialProps({ match: match.match, ...ctx })
       );
     }
   });
