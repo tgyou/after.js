@@ -146,10 +146,9 @@ class AfterComponent extends React.Component<any, any> {
   constructor(props: AfterComponentProps) {
     super(props);
     this.state = {
-      data: props.initialData
+      data: props.initialData,
     }
   }
-  
   
   componentWillMount() {
     const { component, initialData } = this.props;
@@ -165,17 +164,15 @@ class AfterComponent extends React.Component<any, any> {
           ? component.load().then(() => component.getInitialProps && component.getInitialProps({ match, ...ctx }))
           : component.getInitialProps({ match, ...ctx })
 
-    return Promise
-      .resolve(promise instanceof Promise === true)
-      .then(isPromise => {
-        if (isPromise) {
-          this.setState({ loading: promise });
-        }
-        return promise;
-      }).then((data: any) => {
+    if (promise instanceof Promise === true) {
+      this.setState({ loading: true });
+      promise.then((data: any) => {
         if (component.saveInitialProps) savedData[this.props.route.id] = data;
         this.setState({ data, loading: false });
       });
+    } else {
+      this.setState({ data: promise });
+    }
   }
   
   
