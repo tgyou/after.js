@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as ReactDOMServer from 'react-dom/server';
-import Helmet from 'react-helmet';
 import { matchPath, StaticRouter } from 'react-router-dom';
 import { Document as DefaultDoc } from './Document';
 import { After } from './After';
@@ -25,13 +24,14 @@ export interface AfterRenderOptions<T> {
   req: Request;
   res: Response;
   assets: Assets;
+  helmet: any;
   routes: AsyncRouteProps[];
   document?: typeof DefaultDoc;
   customRenderer?: (element: React.ReactElement<T>) => { html: string };
 }
 
 export async function render<T>(options: AfterRenderOptions<T>) {
-  const { req, res, routes, assets, document: Document, customRenderer, ...rest } = options;
+  const { req, res, routes, assets, helmet, document: Document, customRenderer, ...rest } = options;
   const Doc = Document || DefaultDoc;
 
   const context = {};
@@ -46,9 +46,8 @@ export async function render<T>(options: AfterRenderOptions<T>) {
     );
 
     const renderedContent = utils.isPromise(asyncOrSyncRender) ? await asyncOrSyncRender : asyncOrSyncRender;
-    const helmet = Helmet.renderStatic();
 
-    return { helmet, ...renderedContent };
+    return { ...renderedContent };
   };
 
   const location = req['_parsedUrl'];
@@ -80,7 +79,7 @@ export async function render<T>(options: AfterRenderOptions<T>) {
     assets,
     renderPage,
     data,
-    helmet: Helmet.renderStatic(),
+    helmet,
     match: reactRouterMatch,
     ...rest
   });
