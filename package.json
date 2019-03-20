@@ -21,13 +21,12 @@
     "prepare": "tsc -p tsconfig.build.json",
     "start": "tsc -p tsconfig.build.json -w",
     "format": "prettier --trailing-comma es5 --single-quote --write 'packages/*/*.js' 'packages/*/!(node_modules)/**/*.js'",
-    "precommit": "lint-staged",
     "test": "razzle test --env=jsdom --no-cache",
     "test:ci": "CI=true yarn test"
   },
   "lint-staged": {
     "*.js": [
-      "prettier --trailing-comma es5 --single-quote --write",
+      "prettier --trailing-comma es5 --single-quote --write src/",
       "git add"
     ]
   },
